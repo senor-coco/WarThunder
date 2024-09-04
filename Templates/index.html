@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi primer analizador web</title>
+    <style>
+        /* Estilos para el cuerpo de la página */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Comic Sans MS', Arial, verdana; /* Tipo de letra */
+            background-image: url('https://unity.com/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Ffuvbjjlp%2Fproduction%2F6934f8743cb8e810b75a4783f681dd3d5aecc7a8-1440x1000.jpg&w=3840&q=100'); /* Imagen de fondo */
+            background-size: cover; /* Ajustar la imagen para cubrir todo el fondo */
+            background-position: center; /* Centrar la imagen de fondo */
+            background-repeat: no-repeat; /* No repetir la imagen */
+            color: #ffffff; /* Color del texto */
+        }
+        /* Estilos para el contenedor principal */
+        .container {
+            text-align: center; /* Centrar el texto dentro del contenedor */
+            background-color: rgba(0, 0, 0, 0.6); /* Fondo negro translúcido */
+            border: 1px solid #00796b; /* Borde del contenedor */
+            padding: 20px; /* Espaciado interno del contenedor */
+            box-shadow: 0 0 10px rgba(0,0,0,0.5); /* Sombra para profundidad */
+            border-radius: 8px; /* Bordes redondeados */
+            width: 80%; /* Ancho del contenedor */
+            max-width: 600px; /* Ancho máximo del contenedor */
+        }
+        /* Estilos para el área de texto */
+        textarea {
+            width: 100%; /* Ancho completo del área de texto */
+            margin-bottom: 10px; /* Margen inferior */
+            text-align: left; /* Alineación del texto a la izquierda */
+            border: 1px solid #00796b; /* Borde del área de texto */
+            padding: 10px; /* Espaciado interno del área de texto */
+            box-sizing: border-box; /* Incluir el padding y border en el ancho total */
+            resize: both; /* Permitir redimensionar el área de texto */
+            border-radius: 4px; /* Bordes redondeados */
+        }
+        /* Estilos para los botones */
+        input[type="submit"], input[type="button"] {
+            display: inline-block; /* Mostrar los botones en línea */
+            margin: 0 10px; /* Margen horizontal entre botones */
+            padding: 10px 20px; /* Espaciado interno de los botones */
+            background-color: #45a049; /* Color de fondo del botón */
+            color: rgb(255, 255, 255); /* Color del texto en el botón */
+            border: 1px solid #00796b; /* Borde del botón */
+            border-radius: 4px; /* Bordes redondeados del botón */
+            cursor: pointer; /* Cambiar el cursor a puntero sobre el botón */
+            box-shadow: 0 0 5px rgba(0,0,0,0.3); /* Sombra para los botones */
+        }
+        /* Cambio de color de fondo al pasar el ratón sobre los botones */
+        input[type="submit"]:hover, input[type="button"]:hover {
+            background-color: #78cc47; /* Color de fondo al pasar el ratón */
+        }
+        /* Estilos para los encabezados */
+        h1, h2 {
+            color: #acacac; /* Color blanco para encabezados */
+        }
+        h2 {
+            margin-top: 20px; /* Margen superior del encabezado h2 */
+            font-family: 'Courier', verdana, sans-serif; /* Tipo de letra para h2 */
+            text-align: left; /* Alineación del texto a la izquierda */
+        }
+        /* Estilos para el contenedor de tablas */
+        .tables-container {
+            display: flex; /* Mostrar las tablas en línea */
+            justify-content: space-between; /* Espacio igual entre las tablas */
+        }
+        /* Estilos para el área de texto de tokens y la tabla de información de líneas */
+        .tokens-textarea, .line-info-table {
+            width: 48%; /* Ancho de cada contenedor de tabla o textarea */
+            height: 150px; /* Altura fija */
+            border: 2px solid #00796b; /* Borde */
+            border-radius: 5px; /* Bordes redondeados */
+            overflow-y: auto; /* Scroll vertical si el contenido es largo */
+            background-color: rgba(0, 0, 0, 0.6); /* Fondo negro translúcido */
+        }
+        .tokens-textarea {
+            background-color: rgba(255, 255, 255, 0.884); /* Fondo blanco para tokens */
+            color: #000000; /* Texto negro para tokens */
+        }
+        .line-info-table {
+            background-color: rgba(0, 0, 0, 0.8); /* Fondo negro translúcido */
+        }
+        /* Estilos para la tabla dentro del área de información de líneas */
+        .line-info-table table {
+            width: 100%; /* Ancho completo de la tabla */
+            border-collapse: collapse; /* Colapsar bordes de la tabla */
+        }
+        .line-info-table th, .line-info-table td {
+            border: 1px solid #c0c0c0; /* Borde de celdas */
+            padding: 8px; /* Espaciado interno de celdas */
+            text-align: left; /* Alineación del texto en celdas */
+        }
+        .line-info-table th {
+            background-color: #444; /* Fondo gris oscuro para encabezados de la tabla */
+            color: #ffffff; /* Color blanco para el texto del encabezado */
+        }
+    </style>
+    <script>/* Función para limpiar el contenido de los campos */
+        function clearTextarea() {
+            document.querySelector('textarea[name="text"]').value = ''; // Limpia el primer textarea
+            document.querySelector('.tokens-textarea').value = ''; // Limpia la segunda textarea
+            const tableBody = document.querySelector('.line-info-table table tbody');
+            if (tableBody) {
+                tableBody.innerHTML = ''; // Limpia el contenido de la tabla
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Mi primer analizador léxico</h1>
+        <form method="post">
+            <!-- Área de texto para ingresar el código a analizar -->
+            <textarea name="text" rows="10" cols="50"></textarea>
+            <!-- Botón para enviar el formulario y analizar el texto -->
+            <input type="submit" value="Analizar">
+            <!-- Botón para borrar el contenido del área de texto y la tabla -->
+            <input type="button" value="Borrar" onclick="clearTextarea()">
+        </form>
+        <br><br>
+        <h2>Tokens y Tipos</h2>
+        <div class="tables-container">
+            <!-- Área de texto para mostrar los tokens analizados -->
+            <textarea class="tokens-textarea" readonly style="width: 30%; height: 150px; text-align: left; line-height: 0.3;">
+                {% if tokens %}
+                    {% for token in tokens %}
+                        {{ token }}
+                    {% endfor %}
+                {% endif %}
+            </textarea>
+            <!-- Contenedor para la tabla de información de líneas -->
+            <div class="line-info-table">
+                {% if line_info %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Línea</th>
+                            <th>Tipo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for line, tipo in line_info %}
+                        <tr>
+                            <td>{{ line }}</td>
+                            <td>{{ tipo }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
