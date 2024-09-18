@@ -8,155 +8,175 @@
         /* Estilos para el cuerpo de la página */
         body {
             display: flex;
-            justify-content: center;
-            align-items: center;
+            flex-direction: column;
+            margin: 0;
+            font-family: 'Comic Sans MS', Arial, verdana;
+            background-image: url('https://unity.com/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Ffuvbjjlp%2Fproduction%2F6934f8743cb8e810b75a4783f681dd3d5aecc7a8-1440x1000.jpg&w=3840&q=100');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed; /* Fondo fijo al desplazar */
+            color: #97d7d3af;
             height: 100vh;
-              margin: 0;
-            font-family: 'Comic Sans MS', Arial, verdana; /* Tipo de letra */
-            background-image: url('https://unity.com/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Ffuvbjjlp%2Fproduction%2F6934f8743cb8e810b75a4783f681dd3d5aecc7a8-1440x1000.jpg&w=3840&q=100'); /* Imagen de fondo */
-            background-size: cover; /* Ajustar la imagen para cubrir todo el fondo */
-            background-position: center; /* Centrar la imagen de fondo */
-            background-repeat: no-repeat; /* No repetir la imagen */
-            color: #ffffff; /* Color del texto */
+            overflow: auto;
         }
-        /* Estilos para el contenedor principal */
-        .container {
-            text-align: center; /* Centrar el texto dentro del contenedor */
-            background-color: rgba(0, 0, 0, 0.6); /* Fondo negro translúcido */
-            border: 1px solid #00796b; /* Borde del contenedor */
-            padding: 20px; /* Espaciado interno del contenedor */
-            box-shadow: 0 0 10px rgba(0,0,0,0.5); /* Sombra para profundidad */
-            border-radius: 8px; /* Bordes redondeados */
-            width: 80%; /* Ancho del contenedor */
-            max-width: 600px; /* Ancho máximo del contenedor */
+        /* Estilos para el encabezado */
+        .fixed-header {
+            background-color: rgba(0, 0, 0, 0.6);   
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #00796b;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Centrando contenido */
+        }
+        /* Estilos para el formulario en el encabezado */
+        .fixed-header form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%; /* Asegurando que los elementos ocupen el ancho completo */
         }
         /* Estilos para el área de texto */
         textarea {
-            width: 100%; /* Ancho completo del área de texto */
-            margin-bottom: 10px; /* Margen inferior */
-            text-align: left; /* Alineación del texto a la izquierda */
-            border: 1px solid #00796b; /* Borde del área de texto */
-            padding: 10px; /* Espaciado interno del área de texto */
-            box-sizing: border-box; /* Incluir el padding y border en el ancho total */
-            resize: both; /* Permitir redimensionar el área de texto */
-            border-radius: 4px; /* Bordes redondeados */
+            width: 80%;
+            margin-bottom: 10px;
+            text-align: left;
+            border: 1px solid #00796b;
+            padding: 10px;
+            box-sizing: border-box;
+            resize: both;
+            border-radius: 4px;
+            background-color: #f0f0f08b;
         }
         /* Estilos para los botones */
-        input[type="submit"], input[type="button"] {
-            display: inline-block; /* Mostrar los botones en línea */
-            margin: 0 10px; /* Margen horizontal entre botones */
-            padding: 10px 20px; /* Espaciado interno de los botones */
-            background-color: #45a049; /* Color de fondo del botón */
-            color: rgb(255, 255, 255); /* Color del texto en el botón */
-            border: 1px solid #00796b; /* Borde del botón */
-            border-radius: 4px; /* Bordes redondeados del botón */
-            cursor: pointer; /* Cambiar el cursor a puntero sobre el botón */
-            box-shadow: 0 0 5px rgba(0,0,0,0.3); /* Sombra para los botones */
+        button {
+            display: inline-block;
+            margin: 5px;
+            padding: 10px 20px;
+            background-color: #45a049;
+            color: rgb(255, 255, 255);
+            border: 1px solid #00796b;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
         }
-        /* Cambio de color de fondo al pasar el ratón sobre los botones */
-        input[type="submit"]:hover, input[type="button"]:hover {
-            background-color: #78cc47; /* Color de fondo al pasar el ratón */
+        button:hover {
+            background-color: #78cc47;
         }
         /* Estilos para los encabezados */
         h1, h2 {
-            color: #acacac; /* Color blanco para encabezados */
+            color: #8a879c;
+            text-align: center; /* Centrar el título */
         }
         h2 {
-            margin-top: 20px; /* Margen superior del encabezado h2 */
-            font-family: 'Courier', verdana, sans-serif; /* Tipo de letra para h2 */
-            text-align: left; /* Alineación del texto a la izquierda */
+            margin-top: 80px;
+            font-family: 'Courier', verdana, sans-serif;
+            text-align: left;
         }
         /* Estilos para el contenedor de tablas */
-        .tables-container {
-            display: flex; /* Mostrar las tablas en línea */
-            justify-content: space-between; /* Espacio igual entre las tablas */
+        .container {
+            margin-top: 20px; /* Ajuste de margen superior para el contenido */
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border: 1px solid #00796b;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            border-radius: 8px;
+            width: 80%;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
         }
-        /* Estilos para el área de texto de tokens y la tabla de información de líneas */
+        /* Estilos para las tablas */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table th, table td {
+            border: 1px solid #c0c0c0;
+            padding: 8px;
+            text-align: left;
+        }
+        table th {
+            background-color: #444;
+            color: #ffffff8c;
+        }
         .tokens-textarea, .line-info-table {
-            width: 48%; /* Ancho de cada contenedor de tabla o textarea */
-            height: 150px; /* Altura fija */
-            border: 2px solid #00796b; /* Borde */
-            border-radius: 5px; /* Bordes redondeados */
-            overflow-y: auto; /* Scroll vertical si el contenido es largo */
-            background-color: rgba(0, 0, 0, 0.6); /* Fondo negro translúcido */
+            border: 2px solid #00796b;
+            border-radius: 5px;
+            background-color: rgba(0, 0, 0, 0.6);
         }
         .tokens-textarea {
-            background-color: rgba(255, 255, 255, 0.884); /* Fondo blanco para tokens */
-            color: #000000; /* Texto negro para tokens */
-        }
-        .line-info-table {
-            background-color: rgba(0, 0, 0, 0.8); /* Fondo negro translúcido */
-        }
-        /* Estilos para la tabla dentro del área de información de líneas */
-        .line-info-table table {
-            width: 100%; /* Ancho completo de la tabla */
-            border-collapse: collapse; /* Colapsar bordes de la tabla */
-        }
-        .line-info-table th, .line-info-table td {
-            border: 1px solid #c0c0c0; /* Borde de celdas */
-            padding: 8px; /* Espaciado interno de celdas */
-            text-align: left; /* Alineación del texto en celdas */
-        }
-        .line-info-table th {
-            background-color: #444; /* Fondo gris oscuro para encabezados de la tabla */
-            color: #ffffff; /* Color blanco para el texto del encabezado */
+            background-color: rgba(218, 206, 206, 0.416);
+            color: #000000;
         }
     </style>
-    <script>/* Función para limpiar el contenido de los campos */
+    <script>
+        /* Función para limpiar el contenido de los campos */
         function clearTextarea() {
-            document.querySelector('textarea[name="text"]').value = ''; // Limpia el primer textarea
-            document.querySelector('.tokens-textarea').value = ''; // Limpia la segunda textarea
-            const tableBody = document.querySelector('.line-info-table table tbody');
-            if (tableBody) {
-                tableBody.innerHTML = ''; // Limpia el contenido de la tabla
-            }
+            document.querySelector('textarea[name="text"]').value = ''; // Limpia el área de texto
+            document.querySelector('.tokens-textarea table tbody').innerHTML = ''; // Limpia la tabla de tokens
+            document.querySelector('.line-info-table table tbody').innerHTML = ''; // Limpia la tabla de información de líneas
         }
     </script>
 </head>
 <body>
-    <div class="container">
-        <h1>Mi primer analizador léxico</h1>
-        <form method="post">
-            <!-- Área de texto para ingresar el código a analizar -->
-            <textarea name="text" rows="10" cols="50"></textarea>
-            <!-- Botón para enviar el formulario y analizar el texto -->
-            <input type="submit" value="Analizar">
-            <!-- Botón para borrar el contenido del área de texto y la tabla -->
-            <input type="button" value="Borrar" onclick="clearTextarea()">
+
+    <div class="fixed-header">
+        <h1>Mi primer analizador léxico y sintáctico</h1>
+        <form method="POST">
+            <textarea name="text" rows="10" cols="50">{{ text }}</textarea><br>
+            <button type="submit">Analizar</button>
+            <button type="submit" name="reset" value="reset">Borrar</button>
         </form>
-        <br><br>
-        <h2>Tokens y Tipos</h2>
-        <div class="tables-container">
-            <!-- Área de texto para mostrar los tokens analizados -->
-            <textarea class="tokens-textarea" readonly style="width: 30%; height: 150px; text-align: left; line-height: 0.3;">
-                {% if tokens %}
-                    {% for token in tokens %}
-                        {{ token }}
-                    {% endfor %}
-                {% endif %}
-            </textarea>
-            <!-- Contenedor para la tabla de información de líneas -->
-            <div class="line-info-table">
-                {% if line_info %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Línea</th>
-                            <th>Tipo</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for line, tipo in line_info %}
-                        <tr>
-                            <td>{{ line }}</td>
-                            <td>{{ tipo }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% endif %}
-            </div>
-        </div>
     </div>
+    
+    <div class="container">
+        {% if tokens %}
+            <h2>Análisis Léxico</h2>
+            <table class="tokens-textarea">
+                <tr>
+                    <th>Línea</th>
+                    <th>Token</th>
+                    <th>Tipo</th>
+                </tr>
+                {% for token in tokens %}
+                    <tr>
+                        <td>{{ token.line }}</td>
+                        <td>{{ token.token }}</td>
+                        <td>{{ token.type }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+    
+        {% if sintactico_info %}
+            <h2>Análisis Sintáctico</h2>
+            <table class="line-info-table">
+                <tr>
+                    <th>Línea</th>
+                    <th>Tipo de Estructura</th>
+                    <th>Estructura Correcta</th>
+                    <th>Estructura Incorrecta</th>
+                </tr>
+                {% for info in sintactico_info %}
+                    <tr>
+                        <td>{{ info.line }}</td>
+                        <td>{{ info.structure }}</td>
+                        <td>{% if info.correct %}✔{% else %}&nbsp;{% endif %}</td>
+                        <td>{% if not info.correct %}✘{% else %}&nbsp;{% endif %}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+        
+        {% if error_message %}
+            <p style="color:red;">{{ error_message }}</p>
+        {% endif %}
+    </div>
+    
 </body>
 </html>

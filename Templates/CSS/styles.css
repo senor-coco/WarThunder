@@ -1,0 +1,109 @@
+/* Estilos para el cuerpo de la página */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: 'Comic Sans MS', Arial, verdana;
+    background-image: url('https://unity.com/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Ffuvbjjlp%2Fproduction%2F6934f8743cb8e810b75a4783f681dd3d5aecc7a8-1440x1000.jpg&w=3840&q=100');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: #ffffff;
+}
+
+/* Estilos para el contenedor principal */
+.container {
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.6);
+    border: 1px solid #00796b;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    border-radius: 8px;
+    width: 80%;
+    max-width: 600px;
+}
+
+/* Estilos para el área de texto */
+textarea {
+    width: 100%;
+    margin-bottom: 10px;
+    text-align: left;
+    border: 1px solid #00796b;
+    padding: 10px;
+    box-sizing: border-box;
+    resize: both;
+    border-radius: 4px;
+}
+
+/* Estilos para los botones */
+input[type="submit"], input[type="button"] {
+    display: inline-block;
+    margin: 0 10px;
+    padding: 10px 20px;
+    background-color: #45a049;
+    color: #ffffff;
+    border: 1px solid #00796b;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
+
+/* Cambio de color de fondo al pasar el ratón sobre los botones */
+input[type="submit"]:hover, input[type="button"]:hover {
+    background-color: #78cc47;
+}
+
+/* Estilos para los encabezados */
+h1, h2 {
+    color: #acacac;
+}
+
+h2 {
+    margin-top: 20px;
+    font-family: 'Courier', verdana, sans-serif;
+    text-align: left;
+}
+
+/* Estilos para el contenedor de tablas */
+.tables-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Estilos para el área de texto de tokens y la tabla de información de líneas */
+.tokens-textarea, .line-info-table {
+    width: 48%;
+    height: 150px;
+    border: 2px solid #00796b;
+    border-radius: 5px;
+    overflow-y: auto;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.tokens-textarea {
+    background-color: rgba(255, 255, 255, 0.884);
+    color: #000000;
+}
+
+.line-info-table {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+/* Estilos para la tabla dentro del área de información de líneas */
+.line-info-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.line-info-table th, .line-info-table td {
+    border: 1px solid #c0c0c0;
+    padding: 8px;
+    text-align: left;
+}
+
+.line-info-table th {
+    background-color: #444;
+    color: #ffffff;
+}
