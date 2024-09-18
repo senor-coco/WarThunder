@@ -60,7 +60,7 @@ def lexico(text):
     same_line = len(set(line for line, _ in line_info)) == 1
     return tokens, line_info, same_line
 
-# Función para análisis sintáctico
+# Función para análisis sintáctico (actualizada para analizar todas las palabras de cada línea)
 def analizar_sintactico(text):
     estructuras_validas = ["for", "if", "while", "return", "def"]
     lineas = text.splitlines()
@@ -68,19 +68,12 @@ def analizar_sintactico(text):
 
     for i, linea in enumerate(lineas, start=1):
         palabras = linea.strip().split()
-        if palabras:
-            estructura = palabras[0]
-            es_correcta = estructura in estructuras_validas
+        for palabra in palabras:  # Analizamos cada palabra
+            es_correcta = palabra in estructuras_validas
             line_info.append({
                 'line': i,
-                'structure': estructura,
+                'structure': palabra,
                 'correct': es_correcta
-            })
-        else:
-            line_info.append({
-                'line': i,
-                'structure': '',
-                'correct': False
             })
 
     return line_info
@@ -107,5 +100,5 @@ def index():
 
     return render_template('index.html', tokens=None, text=None, line_info=None, same_line=None, sintactico_info=None, error_message=None)
 
-if __name__ == '__main__':
+if __name__ == '__main__': 
     app.run(debug=True)
