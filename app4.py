@@ -11,25 +11,18 @@ reserved = {
    'else' : 'Reservada',
    'class' : 'Reservada',
 }
-
-# Lista de tokens
-tokens = [
+tokens = [ # Lista de tokens
     'Libre',  # Token genérico para palabras
 ] + list(set(reserved.values()))  # Añadir las palabras reservadas a la lista de tokens
-
-# Expresión regular para palabras reservadas
-def t_RESERVED(t):
+def t_RESERVED(t): # Expresión regular para palabras reservadas
     r'\b(for|while|if|else|class)\b'  # Reconocer palabras reservadas
     t.type = reserved.get(t.value)  # Cambiar el tipo a 'Reservada'
     return t
-
-# Expresión regular para palabras generales
-def t_Libre(t):
+def t_Libre(t): # Expresión regular para palabras generales
     r'\b\w+\b'
     return t
 
-# Regla para contar líneas
-def t_newline(t):
+def t_newline(t):# Regla para contar líneas
     r'\n+'
     t.lexer.lineno += len(t.value)
 
