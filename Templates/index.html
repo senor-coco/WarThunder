@@ -166,8 +166,8 @@
                     <tr>
                         <td>{{ info.line }}</td>
                         <td>{{ info.structure }}</td>
-                        <td>{% if info.correct %}✔{% else %}&nbsp;{% endif %}</td>
-                        <td>{% if not info.correct %}✘{% else %}&nbsp;{% endif %}</td>
+                        <td>{% if info.correct %}✘{% else %}&nbsp;{% endif %}</td>
+                        <td>{% if not info.correct %}ID{% else %}&nbsp;{% endif %}</td>
                     </tr>
                 {% endfor %}
             </table>
