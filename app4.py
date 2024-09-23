@@ -1,3 +1,4 @@
+import ply.yacc as yacc  # Importar yacc para el análisis sintáctico
 from flask import Flask, request, render_template
 import ply.lex as lex  # Usar lex de PLY para el análisis léxico
 
@@ -20,7 +21,7 @@ t_LPAREN = r'\('  # Token para el paréntesis izquierdo
 t_RPAREN = r'\)'  # Token para el paréntesis derecho
 t_SEMI = r';'     # Token para el punto y coma
 
-# Regla para reconocer números ent  eros
+# Regla para reconocer números enteros
 def t_NUM(t):
     r'\d+'  # Expresión regular para números enteros
     t.value = int(t.value)  # Convertir el valor del token a entero
@@ -52,7 +53,6 @@ lexer = lex.lex()
 def lexico(text):
     lexer.input(text)  # Proporcionar el texto al lexer
     tokens = []  # Lista para almacenar los tokens generados
-    line_info = []  # Información sobre las líneas y tipos de tokens
 
     # Obtener tokens del lexer
     while True:
@@ -60,26 +60,40 @@ def lexico(text):
         if not tok:
             break
         tokens.append({'line': tok.lineno, 'token': tok.value, 'type': tok.type})  # Agregar información del token
-        line_info.append((tok.lineno, tok.type))  # Agregar información de línea y tipo
 
-    same_line = len(set(line for line, _ in line_info)) == 1  # Verificar si todos los tokens están en la misma línea
-    return tokens, line_info, same_line
+    return tokens
+
+# Reglas de la gramática para yacc
+def p_expresion(p):
+    '''expresion : ID LPAREN expresion RPAREN
+                 | NUM
+                 | Reservada
+    '''
+    p[0] = p[1]  # Simplemente devolvemos el valor como está
+
+def p_error(p):
+    global error_message
+    error_message = "Error de sintaxis"  # Almacenar mensaje de error de sintaxis
+
+# Construir el parser basado en las reglas anteriores
+parser = yacc.yacc()
 
 # Función para realizar el análisis sintáctico
 def analizar_sintactico(text):
-    estructuras_validas = ["for", "if", "while", "return", "def", "hola mundo"]  # Estructuras válidas
     lineas = text.splitlines()  # Separar el texto en líneas
     line_info = []  # Lista para almacenar la información sintáctica
+    estructuras_validas = ["for", "if", "while", "else", "hola mundo"]  # Estructuras válidas
 
     # Analizar cada línea
-    for i, linea in enumerate(lineas, start=1):  
+    for i, linea in enumerate(lineas, start=1):
         palabras = linea.strip().split()  # Separar la línea en palabras
         for palabra in palabras:
             es_correcta = palabra in estructuras_validas  # Verificar si la palabra es una estructura válida
             line_info.append({
                 'line': i,
                 'structure': palabra,
-                'correct': es_correcta  # Indicar si la estructura es correcta
+                'correct': 'x' if es_correcta else '',  # Marcar con 'x' si es correcta
+                'incorrect_structure': palabra if not es_correcta else ''  # Capturar la estructura incorrecta
             })
 
     return line_info
@@ -98,15 +112,15 @@ def index():
     if request.method == 'POST':
         if 'text' in request.form and 'reset' not in request.form:
             text = request.form['text']  # Obtener el texto ingresado
-            tokens, line_info, same_line = lexico(text)  # Realizar análisis léxico
+            tokens = lexico(text)  # Realizar análisis léxico
             sintactico_info = analizar_sintactico(text)  # Realizar análisis sintáctico
-            return render_template('index.html', tokens=tokens, text=text, line_info=line_info, same_line=same_line, sintactico_info=sintactico_info, error_message=error_message)
+            return render_template('index.html', tokens=tokens, text=text, sintactico_info=sintactico_info, error_message=error_message)
         
         elif 'reset' in request.form:  # Si se presiona el botón de reinicio
             reiniciar_numero_linea()  # Reiniciar el lexer
-            return render_template('index.html', tokens=None, text=None, line_info=None, same_line=None, sintactico_info=None, error_message=None)
+            return render_template('index.html', tokens=None, text=None, sintactico_info=None, error_message=None)
 
-    return render_template('index.html', tokens=None, text=None, line_info=None, same_line=None, sintactico_info=None, error_message=None)
+    return render_template('index.html', tokens=None, text=None, sintactico_info=None, error_message=None)
 
 # Ejecutar la aplicación en modo de depuración
 if __name__ == '__main__': 
