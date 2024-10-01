@@ -15,7 +15,7 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            background-attachment: fixed; /* Fondo fijo al desplazar */
+            background-attachment: fixed;
             color: #97d7d3af;
             height: 100vh;
             overflow: auto;
@@ -32,7 +32,6 @@
             flex-direction: column;
             align-items: center;
         }
-        /* Estilos para el formulario en el encabezado */
         .fixed-header form {
             display: flex;
             flex-direction: column;
@@ -104,24 +103,24 @@
             background-color: #444;
             color: #ffffff8c;
         }
-        .tokens-textarea, .line-info-table {
-            border: 2px solid #00796b;
-            border-radius: 5px;
-            background-color: rgba(0, 0, 0, 0.6);
+        /* Estilos para el recuadro de resultados */
+        .result-box {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #00796b;
+            border-radius: 8px;
+            color: #fff;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
         }
-        .tokens-textarea {
-            background-color: rgba(218, 206, 206, 0.416);
-            color: #000000;
+        .result-box.correct {
+            background-color: #45a049; /* Verde para correcto */
+        }
+        .result-box.incorrect {
+            background-color: #d9534f; /* Rojo para incorrecto */
         }
     </style>
-    <script>
-        /* Función para limpiar el contenido de los campos */
-        function clearTextarea() {
-            document.querySelector('textarea[name="text"]').value = ''; // Limpia el área de texto
-            document.querySelector('.tokens-textarea table tbody').innerHTML = ''; // Limpia la tabla de tokens
-            document.querySelector('.line-info-table table tbody').innerHTML = ''; // Limpia la tabla de información de líneas
-        }
-    </script>
 </head>
 <body>
 
@@ -130,53 +129,100 @@
         <form method="POST">
             <textarea name="text" rows="10" cols="50">{{ text }}</textarea><br>
             <button type="submit">Analizar</button>
-            <button type="submit" name="reset" value="reset">Borrar</button>
         </form>
+        <!-- Botón de borrar -->
+        <button type="button" id="btn-borrar">Borrar</button>
     </div>
     
     <div class="container">
-        {% if tokens %}
-            <h2>Análisis Léxico</h2>
-            <table class="tokens-textarea">
-                <tr>
-                    <th>Línea</th>
-                    <th>Token</th>
-                    <th>Tipo</th>
-                </tr>
+        <h2>Resultados del Análisis Léxico y Sintáctico</h2>
+        <table>
+            <tr>
+                <th>Línea</th>
+                <th>Token</th>
+                <th>Tipo</th>
+            </tr>
+            {% if tokens %}
                 {% for token in tokens %}
-                    <tr>
-                        <td>{{ token.line }}</td>
-                        <td>{{ token.token }}</td>
-                        <td>{{ token.type }}</td>
-                    </tr>
-                {% endfor %}
-            </table>
-        {% endif %}
-    
-        {% if sintactico_info %}
-            <h2>Análisis Sintáctico</h2>
-            <table class="line-info-table">
                 <tr>
-                    <th>Línea</th>
-                    <th>Tipo de Estructura</th>
-                    <th>Estructura Correcta</th>
-                    <th>Estructura Incorrecta</th>
+                    <td>{{ token.line }}</td>
+                    <td>{{ token.token }}</td>
+                    <td>{{ token.type }}</td>
                 </tr>
-                {% for info in sintactico_info %}
-                    <tr>
-                        <td>{{ info.line }}</td>
-                        <td>{{ info.structure }}</td>
-                        <td>{% if info.correct %}✘{% else %}&nbsp;{% endif %}</td>
-                        <td>{% if not info.correct %}ID{% else %}&nbsp;{% endif %}</td>
-                    </tr>
                 {% endfor %}
-            </table>
-        {% endif %}
-        
-        {% if error_message %}
-            <p style="color:red;">{{ error_message }}</p>
+            {% else %}
+                <tr>
+                    <td colspan="3">No hay tokens para mostrar.</td>
+                </tr>
+            {% endif %}
+        </table>
+    
+        <h2>Análisis Sintáctico</h2>
+        <table>
+            <tr>
+                <th>Línea</th>
+                <th>Tipo de Estructura</th>
+                <th>Estructura Correcta</th>
+                <th>Estructura Incorrecta</th>
+            </tr>
+            {% if sintactico_info %}
+                {% for info in sintactico_info %}
+                <tr>
+                    <td>{{ info.line }}</td>
+                    <td>{{ info.structure }}</td>
+                    <td>{{ info.correct if info.correct else '' }}</td>
+                    <td>{{ info.incorrect_structure if info.incorrect_structure else '' }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="4">No hay análisis sintáctico para mostrar.</td>
+                </tr>
+            {% endif %}
+        </table>
+
+        <!-- Formulario para el segundo analizador -->
+        <h2>Segundo Analizador Sintáctico</h2>
+        <form method="POST">
+            <textarea name="codigo" rows="5" cols="50" placeholder="Escribe aquí el código a validar..."></textarea><br>
+            <button type="submit">Validar Código</button>
+        </form>
+
+        <!-- Recuadro de resultado del segundo analizador -->
+        {% if resultado_segundo %}
+            <div class="result-box">
+                {{ resultado_segundo }}
+            </div>
         {% endif %}
     </div>
-    
+
+    <script>
+        document.getElementById("btn-borrar").addEventListener("click", function() {
+            // Borra el contenido de los análisis léxico y sintáctico
+            document.querySelector("table").innerHTML = `<tr>
+                <th>Línea</th>
+                <th>Token</th>
+                <th>Tipo</th>
+            </tr><tr>
+                <td colspan="3">No hay tokens para mostrar.</td>
+            </tr>`;
+            
+            // Borra el contenido del análisis sintáctico
+            document.querySelector("table:nth-of-type(2)").innerHTML = `<tr>
+                <th>Línea</th>
+                <th>Tipo de Estructura</th>
+                <th>Estructura Correcta</th>
+                <th>Estructura Incorrecta</th>
+            </tr><tr>
+                <td colspan="4">No hay análisis sintáctico para mostrar.</td>
+            </tr>`;
+            
+            // Borra el resultado del segundo analizador sintáctico
+            var resultBox = document.querySelector(".result-box");
+            if (resultBox) {
+                resultBox.textContent = '';
+            }
+        });
+    </script>
 </body>
 </html>

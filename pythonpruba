@@ -1,0 +1,118 @@
+def analizar_sintactico(text):
+    lexer.input(text)  # Pasar el texto al lexer
+    line_info = []  # Lista para almacenar la información sintáctica
+
+    # Analizar todos los tokens generados por el lexer
+    while True:
+        tok = lexer.token()  # Obtener el siguiente token
+        if not tok:
+            break
+        # Verificar el tipo de token y asignar la estructura correcta o incorrecta
+        if tok.type == 'ID':  # Si es un identificador
+            tipo_estructura = tok.value
+            estructura_correcta = ''
+            incorrecta = 'ID'  # Identificadores se marcan como incorrectos
+        elif tok.type == 'SEMI':  # Si es un punto y coma
+            tipo_estructura = tok.value
+            estructura_correcta = 'Punto y coma'
+            incorrecta = ''
+        elif tok.type == 'LPAREN':
+            tipo_estructura = tok.value
+            estructura_correcta = 'Paréntesis de apertura'
+            incorrecta = ''
+        elif tok.type == 'RPAREN':
+            tipo_estructura = tok.value
+            estructura_correcta = 'Paréntesis de cierre'
+            incorrecta = ''
+        elif tok.type == 'LBRACE':
+            tipo_estructura = tok.value
+            estructura_correcta = 'Llave de apertura'
+            incorrecta = ''
+        elif tok.type == 'RBRACE':
+            tipo_estructura = tok.value
+            estructura_correcta = 'Llave de cierre'
+            incorrecta = ''
+        elif tok.type == 'NUM':
+            tipo_estructura = tok.value
+            estructura_correcta = 'NUM'
+            incorrecta = ''
+        elif tok.type in ['PLUS', 'MINUS', 'TIMES', 'DIVIDE']:
+            tipo_estructura = tok.value
+            estructura_correcta = f'Operador {tok.type.lower()}'
+            incorrecta = ''
+        elif tok.type in reserved:  # Si es una palabra reservada
+            tipo_estructura = tok.value
+            estructura_correcta = 'Palabra reservada'
+            incorrecta = ''
+        else:
+            tipo_estructura = tok.value
+            estructura_correcta = ''
+            incorrecta = tok.value  # Mostrar como incorrecta si no es reconocida
+
+        # Agregar la información sintáctica a la lista
+        line_info.append({
+            'line': tok.lineno,
+            'structure': tipo_estructura,  # Mostrar el valor del token (ej. 'x' o ';')
+            'correct': estructura_correcta,  # Mostrar la estructura correcta (ej. 'Punto y coma')
+            'incorrect_structure': incorrecta  # Mostrar estructura incorrecta (ej. 'ID')
+        })
+
+    return line_info
+
+
+
+    # Análisis sintáctico
+    def analizar_sintactico(text):
+        lineas = text.splitlines()  # Separar el texto en líneas
+        line_info = []  # Lista para almacenar la información sintáctica
+
+        # Analizar cada línea
+        for i, linea in enumerate(lineas, start=1):
+            palabras = linea.strip().split()  # Separar la línea en palabras
+            for palabra in palabras:
+                if palabra in reserved:  # Si es una palabra reservada
+                    tipo_estructura = palabra
+                    estructura_correcta = 'Palabra reservada'
+                    incorrecta = ''
+                elif palabra == '(':
+                    tipo_estructura = '('
+                    estructura_correcta = 'Paréntesis de apertura'
+                    incorrecta = ''
+                elif palabra == ')':
+                    tipo_estructura = ')'
+                    estructura_correcta = 'Paréntesis de cierre'
+                    incorrecta = ''
+                elif palabra == '{':
+                    tipo_estructura = '{'
+                    estructura_correcta = 'Llave de apertura'
+                    incorrecta = ''
+                elif palabra == ';':
+                    tipo_estructura = ';'
+                    estructura_correcta = 'Punto y coma'
+                    incorrecta = ''
+                elif palabra == '}':
+                    tipo_estructura = '}'
+                    estructura_correcta = 'Llave de cierre'
+                    incorrecta = ''
+                elif palabra.isdigit():  # Si es un número
+                    tipo_estructura = palabra
+                    estructura_correcta = 'NUM'
+                    incorrecta = ''
+                elif palabra.isidentifier():  # Si es un identificador válido
+                    tipo_estructura = palabra
+                    estructura_correcta = ''  # Dejar en blanco si es un identificador válido
+                    incorrecta = 'ID'
+                else:
+                    tipo_estructura = palabra
+                    estructura_correcta = ''
+                    incorrecta = palabra  # Marcar como incorrecta si no es reconocida
+
+                line_info.append({
+                    'line': i,
+                    'structure': tipo_estructura,
+                    'correct': estructura_correcta,
+                    'incorrect_structure': incorrecta
+                })
+
+        return line_info
+
