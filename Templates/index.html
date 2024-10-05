@@ -129,35 +129,73 @@
         <form method="POST">
             <textarea name="text" rows="10" cols="50">{{ text }}</textarea><br>
             <button type="submit">Analizar</button>
+            <!-- Botón de borrar ahora envía una solicitud POST para resetear -->
+            <button type="submit" name="reset" value="true">Borrar</button>
         </form>
-        <!-- Botón de borrar -->
-        <button type="button" id="btn-borrar">Borrar</button>
     </div>
     
     <div class="container">
-        <h2>Resultados del Análisis Léxico y Sintáctico</h2>
+        <h2>Resultados del Analizador Léxico</h2>
         <table>
             <tr>
                 <th>Línea</th>
                 <th>Token</th>
-                <th>Tipo</th>
+                <th>Palabra reservada</th>
+                <th>Identificador</th>
+                <th>Cadena</th>
+                <th>Número</th>
+                <th>Símbolo</th>
+                <th>Tipo de Dato</th>
             </tr>
             {% if tokens %}
                 {% for token in tokens %}
                 <tr>
                     <td>{{ token.line }}</td>
                     <td>{{ token.token }}</td>
-                    <td>{{ token.type }}</td>
+                    <td>{{ token.reserved_word if token.reserved_word else '' }}</td>
+                    <td>{{ token.identifier if token.identifier else '' }}</td>
+                    <td>{{ token.string if token.string else '' }}</td>
+                    <td>{{ token.number if token.number else '' }}</td>
+                    <td>{{ token.symbol if token.symbol else '' }}</td>
+                    <td>{{ token.data_type if token.data_type else 'No es un dato' }}</td>
                 </tr>
                 {% endfor %}
             {% else %}
                 <tr>
-                    <td colspan="3">No hay tokens para mostrar.</td>
+                    <td colspan="8">No hay tokens para mostrar.</td>
                 </tr>
             {% endif %}
         </table>
     
-        <h2>Análisis Sintáctico</h2>
+        <h2>Conteo de Tipos de Token</h2>
+        <table>
+            <tr>
+                <th>Tipo de Token</th>
+                <th>Cantidad</th>
+            </tr>
+            <tr>
+                <td>Palabras reservadas</td>
+                <td>{{ reserved_count }}</td>
+            </tr>
+            <tr>
+                <td>Identificadores</td>
+                <td>{{ identifier_count }}</td>
+            </tr>
+            <tr>
+                <td>Cadenas</td>
+                <td>{{ string_count }}</td>
+            </tr>
+            <tr>
+                <td>Números</td>
+                <td>{{ number_count }}</td>
+            </tr>
+            <tr>
+                <td>Símbolos</td>
+                <td>{{ symbol_count }}</td>
+            </tr>
+        </table>
+
+        <h2>Analizador Sintáctico</h2>
         <table>
             <tr>
                 <th>Línea</th>
@@ -195,34 +233,5 @@
             </div>
         {% endif %}
     </div>
-
-    <script>
-        document.getElementById("btn-borrar").addEventListener("click", function() {
-            // Borra el contenido de los análisis léxico y sintáctico
-            document.querySelector("table").innerHTML = `<tr>
-                <th>Línea</th>
-                <th>Token</th>
-                <th>Tipo</th>
-            </tr><tr>
-                <td colspan="3">No hay tokens para mostrar.</td>
-            </tr>`;
-            
-            // Borra el contenido del análisis sintáctico
-            document.querySelector("table:nth-of-type(2)").innerHTML = `<tr>
-                <th>Línea</th>
-                <th>Tipo de Estructura</th>
-                <th>Estructura Correcta</th>
-                <th>Estructura Incorrecta</th>
-            </tr><tr>
-                <td colspan="4">No hay análisis sintáctico para mostrar.</td>
-            </tr>`;
-            
-            // Borra el resultado del segundo analizador sintáctico
-            var resultBox = document.querySelector(".result-box");
-            if (resultBox) {
-                resultBox.textContent = '';
-            }
-        });
-    </script>
 </body>
 </html>
