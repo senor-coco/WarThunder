@@ -72,8 +72,13 @@ def p_error(p):
 # Construir el parser
 parser = yacc.yacc()
 
+# Almacenamos la última expresión ingresada
+last_expression = ""
+
 # Función segura para evaluar la expresión matemática
 def safe_eval(expression):
+    global last_expression
+    last_expression = expression  # Guardamos la última expresión ingresada
     try:
         result_tree = parser.parse(expression)
         tokens = []
@@ -100,9 +105,11 @@ def index():
 
 @app.route('/calculate', methods=['POST'])
 def calculate():
+    global last_expression
     data = request.json
     expression = data.get('expression')
 
+    # Evaluamos la expresión y guardamos los tokens
     result_tree, tokens = safe_eval(expression)
 
     if isinstance(result_tree, str) and result_tree.startswith("Error"):
@@ -134,10 +141,11 @@ def calculate():
 
 @app.route('/generate_tree', methods=['POST'])
 def generate_tree():
+    global last_expression
     data = request.json
-    expression = data.get('expression')
 
-    result_tree, tokens = safe_eval(expression)
+    # Usamos la última expresión ingresada, no el resultado
+    result_tree, tokens = safe_eval(last_expression)
 
     if isinstance(result_tree, str) and result_tree.startswith("Error"):
         return jsonify(status="error", result=result_tree, tokens=tokens)
@@ -149,4 +157,3 @@ def generate_tree():
 
 if __name__ == '__main__':
     app.run(debug=True)
-    

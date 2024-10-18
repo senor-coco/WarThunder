@@ -131,141 +131,152 @@
 </head>
 <body>
     <div class="container">
+        <!-- Contenedor principal de la calculadora -->
         <div class="calculator">
+            <!-- Pantalla de la calculadora, solo lectura -->
             <input type="text" id="display" class="display" disabled>
             <div class="buttons">
-                <button onclick="clearDisplay()">C</button>
-                <button onclick="appendValue('(')">(</button>
-                <button onclick="appendValue(')')">)</button>
-                <button onclick="appendValue('/')">/</button>
-                <button class="number" onclick="appendValue('7')">7</button>
+                <!-- Botones de la calculadora -->
+                <button onclick="clearDisplay()">C</button> <!-- Botón para limpiar la pantalla -->
+                <button onclick="appendValue('(')">(</button> <!-- Botón para agregar paréntesis izquierdo -->
+                <button onclick="appendValue(')')">)</button> <!-- Botón para agregar paréntesis derecho -->
+                <button onclick="appendValue('/')">/</button> <!-- Botón para división -->
+                <button class="number" onclick="appendValue('7')">7</button> <!-- Botones numéricos -->
                 <button class="number" onclick="appendValue('8')">8</button>
                 <button class="number" onclick="appendValue('9')">9</button>
-                <button onclick="appendValue('*')">*</button>
+                <button onclick="appendValue('*')">*</button> <!-- Botón para multiplicación -->
                 <button class="number" onclick="appendValue('4')">4</button>
                 <button class="number" onclick="appendValue('5')">5</button>
                 <button class="number" onclick="appendValue('6')">6</button>
-                <button onclick="appendValue('-')">-</button>
+                <button onclick="appendValue('-')">-</button> <!-- Botón para resta -->
                 <button class="number" onclick="appendValue('1')">1</button>
                 <button class="number" onclick="appendValue('2')">2</button>
                 <button class="number" onclick="appendValue('3')">3</button>
-                <button onclick="appendValue('+')">+</button>
+                <button onclick="appendValue('+')">+</button> <!-- Botón para suma -->
                 <button class="number" onclick="appendValue('0')">0</button>
-                <button onclick="appendValue('.')">.</button>
-                <button class="equals" onclick="calculate()">=</button>
-                <button id="tree" onclick="generateTree()">TREE</button>
+                <button onclick="appendValue('.')">.</button> <!-- Botón para punto decimal -->
+                <button class="equals" onclick="calculate()">=</button> <!-- Botón para calcular el resultado -->
+                <button id="tree" onclick="generateTree()">TREE</button> <!-- Botón para generar el árbol sintáctico -->
             </div>
         </div>
 
+        <!-- Sección para mostrar los tokens generados -->
         <div id="tokens">
             <h3>Tokens:</h3>
             <table>
                 <thead>
                     <tr>
-                        <th>Token</th>
-                        <th>Tipo</th>
+                        <th>Token</th> <!-- Columna para el valor de cada token -->
+                        <th>Tipo</th> <!-- Columna para el tipo de token (número, operación, etc.) -->
                     </tr>
                 </thead>
-                <tbody id="outputTokens"></tbody>
+                <tbody id="outputTokens"></tbody> <!-- Donde se rellenarán los tokens generados -->
             </table>
         </div>
     </div>
 
+    <!-- Contenedor para el árbol sintáctico -->
     <div id="treeContainer">
         <h3>Árbol Sintáctico:</h3>
-        <svg id="treeSvg" viewBox="0 0 800 600"></svg>
+        <svg id="treeSvg" viewBox="0 0 800 600"></svg> <!-- SVG donde se dibuja el árbol sintáctico -->
     </div>
 
     <script>
+        // Función para agregar un valor al display de la calculadora
         function appendValue(value) {
             document.getElementById('display').value += value;
         }
 
+        // Función para limpiar el display, la tabla de tokens y el árbol sintáctico
         function clearDisplay() {
-            document.getElementById('display').value = '';
-            document.getElementById('outputTokens').innerHTML = '';
-            document.getElementById('treeSvg').innerHTML = ''; // Limpiar árbol anterior
+            document.getElementById('display').value = ''; // Limpia la pantalla de la calculadora
+            document.getElementById('outputTokens').innerHTML = ''; // Limpia la tabla de tokens
+            document.getElementById('treeSvg').innerHTML = ''; // Limpia el árbol sintáctico
         }
 
-       // Función para traducir tipos de tokens al español
-function translateTokenType(type) {
-    switch(type) {
-        case 'NUMBER':
-            return 'número';
-        case 'PLUS':
-            return 'suma';
-        case 'MINUS':
-            return 'resta';
-        case 'MULTIPLY':
-            return 'multiplicación';
-        case 'DIVIDE':
-            return 'división';
-        case 'LPAREN':
-            return 'paréntesis izquierdo';
-        case 'RPAREN':
-            return 'paréntesis derecho';
-        case 'POINT':
-            return 'punto';  // Añadir la traducción del punto decimal
-        default:
-            return type;
-    }
-}
+        // Función para traducir los tipos de tokens al español
+        function translateTokenType(type) {
+            switch(type) {
+                case 'NUMBER':
+                    return 'número'; // Traducción para números
+                case 'PLUS':
+                    return 'suma'; // Traducción para suma
+                case 'MINUS':
+                    return 'resta'; // Traducción para resta
+                case 'MULTIPLY':
+                    return 'multiplicación'; // Traducción para multiplicación
+                case 'DIVIDE':
+                    return 'división'; // Traducción para división
+                case 'LPAREN':
+                    return 'paréntesis izquierdo'; // Traducción para paréntesis izquierdo
+                case 'RPAREN':
+                    return 'paréntesis derecho'; // Traducción para paréntesis derecho
+                case 'POINT':
+                    return 'punto'; // Traducción para el punto decimal
+                default:
+                    return type; // Para otros tipos, retornar el tipo original
+            }
+        }
 
+        // Función para calcular el resultado de la expresión ingresada
         async function calculate() {
-            const expression = document.getElementById('display').value;
+            const expression = document.getElementById('display').value; // Obtener la expresión actual
             const response = await fetch('/calculate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ expression })
+                body: JSON.stringify({ expression }) // Enviar la expresión al servidor
             });
-            const result = await response.json();
-        
+            const result = await response.json(); // Obtener la respuesta
+
             if (result.status === 'success') {
-                document.getElementById('display').value = result.result;
+                document.getElementById('display').value = result.result; // Mostrar el resultado en el display
             } else if (result.status === 'error') {
                 document.getElementById('display').value = result.result; // Mostrar el mensaje de error
             }
-        
+
+            // Mostrar los tokens generados en la tabla
             let tokensHtml = '';
             result.tokens.forEach(token => {
-                const translatedType = translateTokenType(token.type); // Traducir el tipo
+                const translatedType = translateTokenType(token.type); // Traducir el tipo del token
                 tokensHtml += `<tr><td>${token.value}</td><td>${translatedType}</td></tr>`;
             });
-            document.getElementById('outputTokens').innerHTML = tokensHtml;
+            document.getElementById('outputTokens').innerHTML = tokensHtml; // Actualizar la tabla de tokens
         }
-        
+
+        // Función para generar y mostrar el árbol sintáctico
         async function generateTree() {
-            const expression = document.getElementById('display').value;
+            const expression = document.getElementById('display').value; // Obtener la expresión actual
             const response = await fetch('/generate_tree', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ expression })
+                body: JSON.stringify({ expression }) // Enviar la expresión al servidor
             });
-            const result = await response.json();
+            const result = await response.json(); // Obtener la respuesta del servidor
 
             if (result.status === 'success') {
-                const tree = result.tree;
+                const tree = result.tree; // Obtener el árbol
                 const svg = document.getElementById('treeSvg');
                 svg.innerHTML = ''; // Limpiar el SVG anterior
 
-                const radius = 20;
-                const offsetX = 100;
-                const offsetY = 60;
+                const radius = 20; // Radio de los nodos
+                const offsetX = 100; // Separación horizontal entre nodos
+                const offsetY = 60; // Separación vertical entre nodos
 
-                const startX = svg.clientWidth / 2;
-                const startY = 50;
+                const startX = svg.clientWidth / 2; // Coordenada X inicial
+                const startY = 50; // Coordenada Y inicial
 
+                // Función para dibujar un nodo del árbol
                 function drawNode(node, x, y, parentX = null, parentY = null) {
-                    if (!node) return;
+                    if (!node) return; // Si no hay nodo, salir de la función
 
-                    // Dibujar el nodo
+                    // Dibujar el círculo del nodo
                     const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                     circle.setAttribute('cx', x);
                     circle.setAttribute('cy', y);
                     circle.setAttribute('r', radius);
                     svg.appendChild(circle);
 
-                    // Añadir texto al nodo
+                    // Añadir el valor del nodo como texto
                     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                     text.setAttribute('x', x);
                     text.setAttribute('y', y + 5);
@@ -284,21 +295,20 @@ function translateTokenType(type) {
                         svg.appendChild(line);
                     }
 
-                    // Dibujar nodos hijos
+                    // Dibujar los hijos del nodo
                     const childY = y + offsetY;
                     if (node.left) {
-                        drawNode(node.left, x - offsetX, childY, x, y);
+                        drawNode(node.left, x - offsetX, childY, x, y); // Dibujar hijo izquierdo
                     }
                     if (node.right) {
-                        drawNode(node.right, x + offsetX, childY, x, y);
+                        drawNode(node.right, x + offsetX, childY, x, y); // Dibujar hijo derecho
                     }
                 }
 
-                drawNode(tree, startX, startY);
+                drawNode(tree, startX, startY); // Dibujar el árbol completo
             } else {
-                console.error(result.result);
+                console.error(result.result); // Mostrar el error en la consola si falla
             }
         }
     </script>
 </body>
-</html>
