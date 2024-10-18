@@ -1,237 +1,314 @@
-    <!DOCTYPE html>
-    <html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Mi primer analizador web</title>
-        <style>
-            /* Estilos para el cuerpo de la página */
-            body {
-                display: flex;
-                flex-direction: column;
-                margin: 0;
-                font-family: 'Comic Sans MS', Arial, verdana;
-                background-image: url('https://unity.com/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Ffuvbjjlp%2Fproduction%2F6934f8743cb8e810b75a4783f681dd3d5aecc7a8-1440x1000.jpg&w=3840&q=100');
-                background-size: cover;
-                background-position: center;
-                background-repeat: no-repeat;
-                background-attachment: fixed;
-                color: #97d7d3af;
-                height: 100vh;
-                overflow: auto;
-            }
-            /* Estilos para el encabezado */
-            .fixed-header {
-                background-color: rgba(0, 0, 0, 0.6);   
-                padding: 20px;
-                text-align: center;
-                border-bottom: 1px solid #00796b;
-                box-shadow: 0 0 10px rgba(0,0,0,0.5);
-                z-index: 1000;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-            }
-            .fixed-header form {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                width: 100%;
-            }
-            /* Estilos para el área de texto */
-            textarea {
-                width: 80%;
-                margin-bottom: 10px;
-                text-align: left;
-                border: 1px solid #00796b;
-                padding: 10px;
-                box-sizing: border-box;
-                resize: both;
-                border-radius: 4px;
-                background-color: #f0f0f08b;
-            }
-            /* Estilos para los botones */
-            button {
-                display: inline-block;
-                margin: 5px;
-                padding: 10px 20px;
-                background-color: #45a049;
-                color: rgb(255, 255, 255);
-                border: 1px solid #00796b;
-                border-radius: 4px;
-                cursor: pointer;
-                box-shadow: 0 0 5px rgba(0,0,0,0.3);
-            }
-            button:hover {
-                background-color: #78cc47;
-            }
-            /* Estilos para los encabezados */
-            h1, h2 {
-                color: #8a879c;
-                text-align: center;
-            }
-            h2 {
-                margin-top: 80px;
-                font-family: 'Courier', verdana, sans-serif;
-                text-align: left;
-            }
-            /* Estilos para el contenedor de tablas */
-            .container {
-                margin-top: 20px;
-                padding: 20px;
-                background-color: rgba(0, 0, 0, 0.6);
-                border: 1px solid #00796b;
-                box-shadow: 0 0 10px rgba(0,0,0,0.5);
-                border-radius: 8px;
-                width: 80%;
-                max-width: 1200px;
-                margin-left: auto;
-                margin-right: auto;
-            }
-            /* Estilos para las tablas */
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-bottom: 20px;
-            }
-            table th, table td {
-                border: 1px solid #c0c0c0;
-                padding: 8px;
-                text-align: left;
-            }
-            table th {
-                background-color: #444;
-                color: #ffffff8c;
-            }
-            /* Estilos para el recuadro de resultados */
-            .result-box {
-                margin-top: 20px;
-                padding: 20px;
-                background-color: #00796b;
-                border-radius: 8px;
-                color: #fff;
-                text-align: center;
-                font-size: 18px;
-                font-weight: bold;
-            }
-            .result-box.correct {
-                background-color: #45a049; /* Verde para correcto */
-            }
-            .result-box.incorrect {
-                background-color: #d9534f; /* Rojo para incorrecto */
-            }
-        </style>
-    </head>
-    <body>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora con Árbol Sintáctico</title>
+    <style>
+        /* Estilos básicos para el cuerpo con imagen de fondo */
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('../static/imagenes/hollownick.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            color: white; /* Para mejorar visibilidad del texto sobre el fondo */
+            display: flex;
+            flex-direction: column; /* Cambiado para apilar elementos verticalmente */
+            justify-content: flex-start;
+            align-items: center;
+            height: 100vh;
+        }
 
-        <div class="fixed-header">
-            <h1>Mi primer analizador léxico y sintáctico</h1>
-            <form method="POST">
-                <textarea name="text" rows="10" cols="50">{{ text }}</textarea><br>
-                <button type="submit">Analizar</button>
-                <!-- Botón de borrar ahora envía una solicitud POST para resetear -->
-                <button type="submit" name="reset" value="true">Borrar</button>
-            </form>
+        .container {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            margin-bottom: 30px; /* Espacio entre la calculadora y la tabla */
+        }
+
+        .calculator {
+            display: inline-block;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.9); /* Fondo blanco semitransparente */
+            margin-right: 50px; /* Espacio entre la calculadora y la tabla */
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5); /* Sombra */
+        }
+
+        .display {
+            font-size: 24px;
+            margin-bottom: 10px;
+            padding: 10px;
+            width: 220px;
+            text-align: right;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff; /* Fondo blanco para mejor contraste */
+        }
+
+        /* Estilos para los botones de la calculadora */
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .buttons button {
+            font-size: 18px;
+            padding: 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .buttons button.number {
+            background-color: #006994;
+            color: white;
+        }
+
+        .buttons button.equals {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .buttons button#tree {
+            grid-column: span 4; /* Hace que el botón TREE ocupe toda la fila */
+            background-color: #800080; /* Morado */
+            color: white;
+        }
+
+        .buttons button:hover {
+            opacity: 0.8; /* Efecto hover */
+        }
+
+        /* Estilos para la tabla de tokens */
+        #tokens {
+            margin-top: 0; /* Asegura que se alinee en la misma fila de la calculadora */
+        }
+
+        table {
+            border-collapse: collapse; /* Colapsa bordes */
+            background-color: rgba(255, 255, 255, 0.9); /* Fondo blanco semitransparente */
+            color: black; /* Texto negro */
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        th, td {
+            border: 1px solid #ccc; /* Estilo de bordes */
+            padding: 8px; /* Espaciado en celdas */
+        }
+
+        /* Estilos para el contenedor del árbol sintáctico */
+        #treeContainer {
+            margin-top: 30px; /* Espacio entre la calculadora y el árbol sintáctico */
+        }
+
+        svg {
+            margin: 0 auto; /* Centra el SVG */
+            border: 1px solid #ccc; /* Bordes del SVG */
+            width: 800px;
+            height: 600px;
+        }
+
+        circle {
+            fill: lightblue; /* Color de relleno de los círculos */
+            stroke: #333; /* Color del borde */
+            stroke-width: 2; /* Grosor del borde */
+        }
+
+        text {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            fill: black; /* Color del texto */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Contenedor principal de la calculadora -->
+        <div class="calculator">
+            <!-- Pantalla de la calculadora, solo lectura -->
+            <input type="text" id="display" class="display" disabled>
+            <div class="buttons">
+                <!-- Botones de la calculadora -->
+                <button onclick="clearDisplay()">C</button> <!-- Botón para limpiar la pantalla -->
+                <button onclick="appendValue('(')">(</button> <!-- Botón para agregar paréntesis izquierdo -->
+                <button onclick="appendValue(')')">)</button> <!-- Botón para agregar paréntesis derecho -->
+                <button onclick="appendValue('/')">/</button> <!-- Botón para división -->
+                <button class="number" onclick="appendValue('7')">7</button> <!-- Botones numéricos -->
+                <button class="number" onclick="appendValue('8')">8</button>
+                <button class="number" onclick="appendValue('9')">9</button>
+                <button onclick="appendValue('*')">*</button> <!-- Botón para multiplicación -->
+                <button class="number" onclick="appendValue('4')">4</button>
+                <button class="number" onclick="appendValue('5')">5</button>
+                <button class="number" onclick="appendValue('6')">6</button>
+                <button onclick="appendValue('-')">-</button> <!-- Botón para resta -->
+                <button class="number" onclick="appendValue('1')">1</button>
+                <button class="number" onclick="appendValue('2')">2</button>
+                <button class="number" onclick="appendValue('3')">3</button>
+                <button onclick="appendValue('+')">+</button> <!-- Botón para suma -->
+                <button class="number" onclick="appendValue('0')">0</button>
+                <button onclick="appendValue('.')">.</button> <!-- Botón para punto decimal -->
+                <button class="equals" onclick="calculate()">=</button> <!-- Botón para calcular el resultado -->
+                <button id="tree" onclick="generateTree()">TREE</button> <!-- Botón para generar el árbol sintáctico -->
+            </div>
         </div>
-        
-        <div class="container">
-            <h2>Resultados del Analizador Léxico</h2>
-            <table>
-                <tr>
-                    <th>Línea</th>
-                    <th>Token</th>
-                    <th>Palabra reservada</th>
-                    <th>Identificador</th>
-                    <th>Cadena</th>
-                    <th>Número</th>
-                    <th>Símbolo</th>
-                    <th>Tipo de Dato</th>
-                </tr>
-                {% if tokens %}
-                    {% for token in tokens %}
-                    <tr>
-                        <td>{{ token.line }}</td>
-                        <td>{{ token.token }}</td>
-                        <td>{{ token.reserved_word if token.reserved_word else '' }}</td>
-                        <td>{{ token.identifier if token.identifier else '' }}</td>
-                        <td>{{ token.string if token.string else '' }}</td>
-                        <td>{{ token.number if token.number else '' }}</td>
-                        <td>{{ token.symbol if token.symbol else '' }}</td>
-                        <td>{{ token.data_type if token.data_type else 'No es un dato' }}</td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="8">No hay tokens para mostrar.</td>
-                    </tr>
-                {% endif %}
-            </table>
-        
-            <h2>Conteo de Tipos de Token</h2>
-            <table>
-                <tr>
-                    <th>Tipo de Token</th>
-                    <th>Cantidad</th>
-                </tr>
-                <tr>
-                    <td>Palabras reservadas</td>
-                    <td>{{ reserved_count }}</td>
-                </tr>
-                <tr>
-                    <td>Identificadores</td>
-                    <td>{{ identifier_count }}</td>
-                </tr>
-                <tr>
-                    <td>Cadenas</td>
-                    <td>{{ string_count }}</td>
-                </tr>
-                <tr>
-                    <td>Números</td>
-                    <td>{{ number_count }}</td>
-                </tr>
-                <tr>
-                    <td>Símbolos</td>
-                    <td>{{ symbol_count }}</td>
-                </tr>
-            </table>
 
-            <h2>Analizador Sintáctico</h2>
+        <!-- Sección para mostrar los tokens generados -->
+        <div id="tokens">
+            <h3>Tokens:</h3>
             <table>
-                <tr>
-                    <th>Línea</th>
-                    <th>Tipo de Estructura</th>
-                    <th>Estructura Correcta</th>
-                    <th>Estructura Incorrecta</th>
-                </tr>
-                {% if sintactico_info %}
-                    {% for info in sintactico_info %}
+                <thead>
                     <tr>
-                        <td>{{ info.line }}</td>
-                        <td>{{ info.structure }}</td>
-                        <td>{{ info.correct if info.correct else '' }}</td>
-                        <td>{{ info.incorrect_structure if info.incorrect_structure else '' }}</td>
+                        <th>Token</th> <!-- Columna para el valor de cada token -->
+                        <th>Tipo</th> <!-- Columna para el tipo de token (número, operación, etc.) -->
                     </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="4">No hay análisis sintáctico para mostrar.</td>
-                    </tr>
-                {% endif %}
+                </thead>
+                <tbody id="outputTokens"></tbody> <!-- Donde se rellenarán los tokens generados -->
             </table>
-
-            <!-- Formulario para el segundo analizador -->
-            <h2>Segundo Analizador Sintáctico</h2>
-            <form method="POST">
-                <textarea name="codigo" rows="5" cols="50" placeholder="Escribe aquí el código a validar..."></textarea><br>
-                <button type="submit">Validar Código</button>
-            </form>
-
-            <!-- Recuadro de resultado del segundo analizador -->
-            {% if resultado_segundo %}
-                <div class="result-box">
-                    {{ resultado_segundo }}
-                </div>
-            {% endif %}
         </div>
-    </body>
-    </html>
+    </div>
+
+    <!-- Contenedor para el árbol sintáctico -->
+    <div id="treeContainer">
+        <h3>Árbol Sintáctico:</h3>
+        <svg id="treeSvg" viewBox="0 0 800 600"></svg> <!-- SVG donde se dibuja el árbol sintáctico -->
+    </div>
+
+    <script>
+        // Función para agregar un valor al display de la calculadora
+        function appendValue(value) {
+            document.getElementById('display').value += value;
+        }
+
+        // Función para limpiar el display, la tabla de tokens y el árbol sintáctico
+        function clearDisplay() {
+            document.getElementById('display').value = ''; // Limpia la pantalla de la calculadora
+            document.getElementById('outputTokens').innerHTML = ''; // Limpia la tabla de tokens
+            document.getElementById('treeSvg').innerHTML = ''; // Limpia el árbol sintáctico
+        }
+
+        // Función para traducir los tipos de tokens al español
+        function translateTokenType(type) {
+            switch(type) {
+                case 'NUMBER':
+                    return 'número'; // Traducción para números
+                case 'PLUS':
+                    return 'suma'; // Traducción para suma
+                case 'MINUS':
+                    return 'resta'; // Traducción para resta
+                case 'MULTIPLY':
+                    return 'multiplicación'; // Traducción para multiplicación
+                case 'DIVIDE':
+                    return 'división'; // Traducción para división
+                case 'LPAREN':
+                    return 'paréntesis izquierdo'; // Traducción para paréntesis izquierdo
+                case 'RPAREN':
+                    return 'paréntesis derecho'; // Traducción para paréntesis derecho
+                case 'POINT':
+                    return 'punto'; // Traducción para el punto decimal
+                default:
+                    return type; // Para otros tipos, retornar el tipo original
+            }
+        }
+
+        // Función para calcular el resultado de la expresión ingresada
+        async function calculate() {
+            const expression = document.getElementById('display').value; // Obtener la expresión actual
+            const response = await fetch('/calculate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ expression }) // Enviar la expresión al servidor
+            });
+            const result = await response.json(); // Obtener la respuesta
+
+            if (result.status === 'success') {
+                document.getElementById('display').value = result.result; // Mostrar el resultado en el display
+            } else if (result.status === 'error') {
+                document.getElementById('display').value = result.result; // Mostrar el mensaje de error
+            }
+
+            // Mostrar los tokens generados en la tabla
+            let tokensHtml = '';
+            result.tokens.forEach(token => {
+                const translatedType = translateTokenType(token.type); // Traducir el tipo del token
+                tokensHtml += `<tr><td>${token.value}</td><td>${translatedType}</td></tr>`;
+            });
+            document.getElementById('outputTokens').innerHTML = tokensHtml; // Actualizar la tabla de tokens
+        }
+
+        // Función para generar y mostrar el árbol sintáctico
+        async function generateTree() {
+            const expression = document.getElementById('display').value; // Obtener la expresión actual
+            const response = await fetch('/generate_tree', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ expression }) // Enviar la expresión al servidor
+            });
+            const result = await response.json(); // Obtener la respuesta del servidor
+
+            if (result.status === 'success') {
+                const tree = result.tree; // Obtener el árbol
+                const svg = document.getElementById('treeSvg');
+                svg.innerHTML = ''; // Limpiar el SVG anterior
+
+                const radius = 20; // Radio de los nodos
+                const offsetX = 100; // Separación horizontal entre nodos
+                const offsetY = 60; // Separación vertical entre nodos
+
+                const startX = svg.clientWidth / 2; // Coordenada X inicial
+                const startY = 50; // Coordenada Y inicial
+
+                // Función para dibujar un nodo del árbol
+                function drawNode(node, x, y, parentX = null, parentY = null) {
+                    if (!node) return; // Si no hay nodo, salir de la función
+
+                    // Dibujar el círculo del nodo
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', x);
+                    circle.setAttribute('cy', y);
+                    circle.setAttribute('r', radius);
+                    svg.appendChild(circle);
+
+                    // Añadir el valor del nodo como texto
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', x);
+                    text.setAttribute('y', y + 5);
+                    text.setAttribute('text-anchor', 'middle');
+                    text.textContent = node.value;
+                    svg.appendChild(text);
+
+                    // Dibujar la línea hacia el nodo padre
+                    if (parentX !== null && parentY !== null) {
+                        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        line.setAttribute('x1', parentX);
+                        line.setAttribute('y1', parentY);
+                        line.setAttribute('x2', x);
+                        line.setAttribute('y2', y);
+                        line.setAttribute('stroke', 'black');
+                        svg.appendChild(line);
+                    }
+
+                    // Dibujar los hijos del nodo
+                    const childY = y + offsetY;
+                    if (node.left) {
+                        drawNode(node.left, x - offsetX, childY, x, y); // Dibujar hijo izquierdo
+                    }
+                    if (node.right) {
+                        drawNode(node.right, x + offsetX, childY, x, y); // Dibujar hijo derecho
+                    }
+                }
+
+                drawNode(tree, startX, startY); // Dibujar el árbol completo
+            } else {
+                console.error(result.result); // Mostrar el error en la consola si falla
+            }
+        }
+    </script>
+</body>

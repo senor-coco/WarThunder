@@ -1,237 +1,159 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi primer analizador web</title>
-    <style>
-        /* Estilos para el cuerpo de la página */
-        body {
-            display: flex;
-            flex-direction: column;
-            margin: 0;
-            font-family: 'Comic Sans MS', Arial, verdana;
-            background-image: url('https://unity.com/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Ffuvbjjlp%2Fproduction%2F6934f8743cb8e810b75a4783f681dd3d5aecc7a8-1440x1000.jpg&w=3840&q=100');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            color: #97d7d3af;
-            height: 100vh;
-            overflow: auto;
-        }
-        /* Estilos para el encabezado */
-        .fixed-header {
-            background-color: rgba(0, 0, 0, 0.6);   
-            padding: 20px;
-            text-align: center;
-            border-bottom: 1px solid #00796b;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .fixed-header form {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-        }
-        /* Estilos para el área de texto */
-        textarea {
-            width: 80%;
-            margin-bottom: 10px;
-            text-align: left;
-            border: 1px solid #00796b;
-            padding: 10px;
-            box-sizing: border-box;
-            resize: both;
-            border-radius: 4px;
-            background-color: #f0f0f08b;
-        }
-        /* Estilos para los botones */
-        button {
-            display: inline-block;
-            margin: 5px;
-            padding: 10px 20px;
-            background-color: #45a049;
-            color: rgb(255, 255, 255);
-            border: 1px solid #00796b;
-            border-radius: 4px;
-            cursor: pointer;
-            box-shadow: 0 0 5px rgba(0,0,0,0.3);
-        }
-        button:hover {
-            background-color: #78cc47;
-        }
-        /* Estilos para los encabezados */
-        h1, h2 {
-            color: #8a879c;
-            text-align: center;
-        }
-        h2 {
-            margin-top: 80px;
-            font-family: 'Courier', verdana, sans-serif;
-            text-align: left;
-        }
-        /* Estilos para el contenedor de tablas */
-        .container {
-            margin-top: 20px;
-            padding: 20px;
-            background-color: rgba(0, 0, 0, 0.6);
-            border: 1px solid #00796b;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            border-radius: 8px;
-            width: 80%;
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        /* Estilos para las tablas */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        table th, table td {
-            border: 1px solid #c0c0c0;
-            padding: 8px;
-            text-align: left;
-        }
-        table th {
-            background-color: #444;
-            color: #ffffff8c;
-        }
-        /* Estilos para el recuadro de resultados */
-        .result-box {
-            margin-top: 20px;
-            padding: 20px;
-            background-color: #00796b;
-            border-radius: 8px;
-            color: #fff;
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-        }
-        .result-box.correct {
-            background-color: #45a049; /* Verde para correcto */
-        }
-        .result-box.incorrect {
-            background-color: #d9534f; /* Rojo para incorrecto */
-        }
-    </style>
-</head>
-<body>
+from flask import Flask, render_template, request, jsonify
+import ply.lex as lex
+import ply.yacc as yacc
 
-    <div class="fixed-header">
-        <h1>Mi primer analizador léxico y sintáctico</h1>
-        <form method="POST">
-            <textarea name="text" rows="10" cols="50">{{ text }}</textarea><br>
-            <button type="submit">Analizar</button>
-            <!-- Botón de borrar ahora envía una solicitud POST para resetear -->
-            <button type="submit" name="reset" value="true">Borrar</button>
-        </form>
-    </div>
+app = Flask(__name__)
+
+# Definición de tokens para PLY
+tokens = (
+    'NUMBER', 'POINT', 'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'LPAREN', 'RPAREN'
+)
+
+# Expresiones regulares para tokens simples
+t_PLUS = r'\+'
+t_MINUS = r'-'
+t_TIMES = r'\*'
+t_DIVIDE = r'/'
+t_LPAREN = r'\('
+t_RPAREN = r'\)'
+
+# Definición del token para el punto decimal
+t_POINT = r'\.'
+
+# Definición de número (solo enteros, el punto será un token separado)
+def t_NUMBER(t):
+    r'\d+'
+    t.value = int(t.value)  # Los números son enteros
+    return t
+
+# Ignorar espacios y tabulaciones
+t_ignore = ' \t'
+
+# Manejo de errores
+def t_error(t):
+    raise ValueError(f"Carácter ilegal '{t.value[0]}'")
+    t.lexer.skip(1)
+
+# Construir el analizador léxico
+lexer = lex.lex()
+
+# Nodo de árbol sintáctico
+class Node:
+    def __init__(self, value, left=None, right=None):
+        self.value = value
+        self.left = left
+        self.right = right
+
+# Definición de la gramática para PLY
+def p_expression_binop(p):
+    '''expression : expression PLUS expression
+                  | expression MINUS expression
+                  | expression TIMES expression
+                  | expression DIVIDE expression'''
+    p[0] = Node(p[2], left=p[1], right=p[3])
+
+def p_expression_group(p):
+    'expression : LPAREN expression RPAREN'
+    p[0] = p[2]
+
+# Nueva regla para manejar números con decimales (número + punto + número)
+def p_expression_decimal(p):
+    'expression : NUMBER POINT NUMBER'
+    decimal_value = float(f"{p[1]}.{p[3]}")  # Convertir la combinación de número y punto en un valor decimal
+    p[0] = Node(decimal_value)
+
+def p_expression_number(p):
+    'expression : NUMBER'
+    p[0] = Node(p[1])
+
+def p_error(p):
+    raise SyntaxError("Error de sintaxis")
+
+# Construir el parser
+parser = yacc.yacc()
+
+# Almacenamos la última expresión ingresada
+last_expression = ""
+
+# Función segura para evaluar la expresión matemática
+def safe_eval(expression):
+    global last_expression
+    last_expression = expression  # Guardamos la última expresión ingresada
+    try:
+        result_tree = parser.parse(expression)
+        tokens = []
+        lexer.input(expression)
+        for tok in lexer:
+            tokens.append({'value': str(tok.value), 'type': tok.type})
+        return result_tree, tokens
+    except Exception as e:
+        return f"Error: Expresión inválida ({str(e)})", []
+
+# Convertir el árbol en una estructura que pueda ser enviada en JSON
+def tree_to_dict(node):
+    if not node:
+        return None
+    return {
+        'value': str(node.value),
+        'left': tree_to_dict(node.left),
+        'right': tree_to_dict(node.right)
+    }
+
+@app.route('/')
+def index():
+    return render_template('index1.html')
+
+@app.route('/calculate', methods=['POST'])
+def calculate():
+    global last_expression
+    data = request.json
+    expression = data.get('expression')
+
+    # Evaluamos la expresión y guardamos los tokens
+    result_tree, tokens = safe_eval(expression)
+
+    if isinstance(result_tree, str) and result_tree.startswith("Error"):
+        return jsonify(status="error", result=result_tree, tokens=tokens)
+
+    # Evaluar el valor del árbol
+    def eval_tree(node):
+        if isinstance(node.value, (int, float)):
+            return node.value
+        elif node.value == '+':
+            return eval_tree(node.left) + eval_tree(node.right)
+        elif node.value == '-':
+            return eval_tree(node.left) - eval_tree(node.right)
+        elif node.value == '*':
+            return eval_tree(node.left) * eval_tree(node.right)
+        elif node.value == '/':
+            right_value = eval_tree(node.right)
+            if right_value == 0:
+                raise ZeroDivisionError("No se puede dividir entre cero")
+            return eval_tree(node.left) / right_value
+
+    try:
+        result = eval_tree(result_tree)
+    except ZeroDivisionError as e:
+        return jsonify(status="error", result=str(e), tokens=tokens)
     
-    <div class="container">
-        <h2>Resultados del Analizador Léxico</h2>
-        <table>
-            <tr>
-                <th>Línea</th>
-                <th>Token</th>
-                <th>Palabra reservada</th>
-                <th>Identificador</th>
-                <th>Cadena</th>
-                <th>Número</th>
-                <th>Símbolo</th>
-                <th>Tipo de Dato</th>
-            </tr>
-            {% if tokens %}
-                {% for token in tokens %}
-                <tr>
-                    <td>{{ token.line }}</td>
-                    <td>{{ token.token }}</td>
-                    <td>{{ token.reserved_word if token.reserved_word else '' }}</td>
-                    <td>{{ token.identifier if token.identifier else '' }}</td>
-                    <td>{{ token.string if token.string else '' }}</td>
-                    <td>{{ token.number if token.number else '' }}</td>
-                    <td>{{ token.symbol if token.symbol else '' }}</td>
-                    <td>{{ token.data_type if token.data_type else 'No es un dato' }}</td>
-                </tr>
-                {% endfor %}
-            {% else %}
-                <tr>
-                    <td colspan="8">No hay tokens para mostrar.</td>
-                </tr>
-            {% endif %}
-        </table>
+    return jsonify(status="success", result=result, tokens=tokens)
+
+
+@app.route('/generate_tree', methods=['POST'])
+def generate_tree():
+    global last_expression
+    data = request.json
+
+    # Usamos la última expresión ingresada, no el resultado
+    result_tree, tokens = safe_eval(last_expression)
+
+    if isinstance(result_tree, str) and result_tree.startswith("Error"):
+        return jsonify(status="error", result=result_tree, tokens=tokens)
+
+    # Convertir el árbol en un diccionario para enviarlo al frontend
+    tree_dict = tree_to_dict(result_tree)
     
-        <h2>Conteo de Tipos de Token</h2>
-        <table>
-            <tr>
-                <th>Tipo de Token</th>
-                <th>Cantidad</th>
-            </tr>
-            <tr>
-                <td>Palabras reservadas</td>
-                <td>{{ reserved_count }}</td>
-            </tr>
-            <tr>
-                <td>Identificadores</td>
-                <td>{{ identifier_count }}</td>
-            </tr>
-            <tr>
-                <td>Cadenas</td>
-                <td>{{ string_count }}</td>
-            </tr>
-            <tr>
-                <td>Números</td>
-                <td>{{ number_count }}</td>
-            </tr>
-            <tr>
-                <td>Símbolos</td>
-                <td>{{ symbol_count }}</td>
-            </tr>
-        </table>
+    return jsonify(status="success", tree=tree_dict)
 
-        <h2>Analizador Sintáctico</h2>
-        <table>
-            <tr>
-                <th>Línea</th>
-                <th>Tipo de Estructura</th>
-                <th>Estructura Correcta</th>
-                <th>Estructura Incorrecta</th>
-            </tr>
-            {% if sintactico_info %}
-                {% for info in sintactico_info %}
-                <tr>
-                    <td>{{ info.line }}</td>
-                    <td>{{ info.structure }}</td>
-                    <td>{{ info.correct if info.correct else '' }}</td>
-                    <td>{{ info.incorrect_structure if info.incorrect_structure else '' }}</td>
-                </tr>
-                {% endfor %}
-            {% else %}
-                <tr>
-                    <td colspan="4">No hay análisis sintáctico para mostrar.</td>
-                </tr>
-            {% endif %}
-        </table>
-
-        <!-- Formulario para el segundo analizador -->
-        <h2>Segundo Analizador Sintáctico</h2>
-        <form method="POST">
-            <textarea name="codigo" rows="5" cols="50" placeholder="Escribe aquí el código a validar..."></textarea><br>
-            <button type="submit">Validar Código</button>
-        </form>
-
-        <!-- Recuadro de resultado del segundo analizador -->
-        {% if resultado_segundo %}
-            <div class="result-box">
-                {{ resultado_segundo }}
-            </div>
-        {% endif %}
-    </div>
-</body>
-</html>
+if __name__ == '__main__':
+    app.run(debug=True)
