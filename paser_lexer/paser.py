@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi primer analizador web</title>
+    <style>
+        /* Estilos para el cuerpo de la página */
+        body {
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            font-family: 'Comic Sans MS', Arial, verdana;
+            background-image: url('https://unity.com/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Ffuvbjjlp%2Fproduction%2F6934f8743cb8e810b75a4783f681dd3d5aecc7a8-1440x1000.jpg&w=3840&q=100');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: #97d7d3af;
+            height: 100vh;
+            overflow: auto;
+        }
+        /* Estilos para el encabezado */
+        .fixed-header {
+            background-color: rgba(0, 0, 0, 0.6);   
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #00796b;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .fixed-header form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        /* Estilos para el área de texto */
+        textarea {
+            width: 80%;
+            margin-bottom: 10px;
+            text-align: left;
+            border: 1px solid #00796b;
+            padding: 10px;
+            box-sizing: border-box;
+            resize: both;
+            border-radius: 4px;
+            background-color: #f0f0f08b;
+        }
+        /* Estilos para los botones */
+        button {
+            display: inline-block;
+            margin: 5px;
+            padding: 10px 20px;
+            background-color: #45a049;
+            color: rgb(255, 255, 255);
+            border: 1px solid #00796b;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+        button:hover {
+            background-color: #78cc47;
+        }
+        /* Estilos para los encabezados */
+        h1, h2 {
+            color: #8a879c;
+            text-align: center;
+        }
+        h2 {
+            margin-top: 80px;
+            font-family: 'Courier', verdana, sans-serif;
+            text-align: left;
+        }
+        /* Estilos para el contenedor de tablas */
+        .container {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border: 1px solid #00796b;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            border-radius: 8px;
+            width: 80%;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        /* Estilos para las tablas */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table th, table td {
+            border: 1px solid #c0c0c0;
+            padding: 8px;
+            text-align: left;
+        }
+        table th {
+            background-color: #444;
+            color: #ffffff8c;
+        }
+        /* Estilos para el recuadro de resultados */
+        .result-box {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #00796b;
+            border-radius: 8px;
+            color: #fff;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .result-box.correct {
+            background-color: #45a049; /* Verde para correcto */
+        }
+        .result-box.incorrect {
+            background-color: #d9534f; /* Rojo para incorrecto */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="fixed-header">
+        <h1>Mi primer analizador léxico y sintáctico</h1>
+        <form method="POST">
+            <textarea name="text" rows="10" cols="50">{{ text }}</textarea><br>
+            <button type="submit">Analizar</button>
+            <!-- Botón de borrar ahora envía una solicitud POST para resetear -->
+            <button type="submit" name="reset" value="true">Borrar</button>
+        </form>
+    </div>
+    
+    <div class="container">
+        <h2>Resultados del Analizador Léxico</h2>
+        <table>
+            <tr>
+                <th>Línea</th>
+                <th>Token</th>
+                <th>Palabra reservada</th>
+                <th>Identificador</th>
+                <th>Cadena</th>
+                <th>Número</th>
+                <th>Símbolo</th>
+                <th>Tipo de Dato</th>
+            </tr>
+            {% if tokens %}
+                {% for token in tokens %}
+                <tr>
+                    <td>{{ token.line }}</td>
+                    <td>{{ token.token }}</td>
+                    <td>{{ token.reserved_word if token.reserved_word else '' }}</td>
+                    <td>{{ token.identifier if token.identifier else '' }}</td>
+                    <td>{{ token.string if token.string else '' }}</td>
+                    <td>{{ token.number if token.number else '' }}</td>
+                    <td>{{ token.symbol if token.symbol else '' }}</td>
+                    <td>{{ token.data_type if token.data_type else 'No es un dato' }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="8">No hay tokens para mostrar.</td>
+                </tr>
+            {% endif %}
+        </table>
+    
+        <h2>Conteo de Tipos de Token</h2>
+        <table>
+            <tr>
+                <th>Tipo de Token</th>
+                <th>Cantidad</th>
+            </tr>
+            <tr>
+                <td>Palabras reservadas</td>
+                <td>{{ reserved_count }}</td>
+            </tr>
+            <tr>
+                <td>Identificadores</td>
+                <td>{{ identifier_count }}</td>
+            </tr>
+            <tr>
+                <td>Cadenas</td>
+                <td>{{ string_count }}</td>
+            </tr>
+            <tr>
+                <td>Números</td>
+                <td>{{ number_count }}</td>
+            </tr>
+            <tr>
+                <td>Símbolos</td>
+                <td>{{ symbol_count }}</td>
+            </tr>
+        </table>
+
+        <h2>Analizador Sintáctico</h2>
+        <table>
+            <tr>
+                <th>Línea</th>
+                <th>Tipo de Estructura</th>
+                <th>Estructura Correcta</th>
+                <th>Estructura Incorrecta</th>
+            </tr>
+            {% if sintactico_info %}
+                {% for info in sintactico_info %}
+                <tr>
+                    <td>{{ info.line }}</td>
+                    <td>{{ info.structure }}</td>
+                    <td>{{ info.correct if info.correct else '' }}</td>
+                    <td>{{ info.incorrect_structure if info.incorrect_structure else '' }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="4">No hay análisis sintáctico para mostrar.</td>
+                </tr>
+            {% endif %}
+        </table>
+
+        <!-- Formulario para el segundo analizador -->
+        <h2>Segundo Analizador Sintáctico</h2>
+        <form method="POST">
+            <textarea name="codigo" rows="5" cols="50" placeholder="Escribe aquí el código a validar..."></textarea><br>
+            <button type="submit">Validar Código</button>
+        </form>
+
+        <!-- Recuadro de resultado del segundo analizador -->
+        {% if resultado_segundo %}
+            <div class="result-box">
+                {{ resultado_segundo }}
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
